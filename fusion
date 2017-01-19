@@ -1,0 +1,237 @@
+#FusionChat Linux v0.0.7
+#By NjlsShade
+
+#Varibles-----------------------------------------------------
+LOGIN=0
+REG=0
+WIDTH=1000
+HEIGHT=1000
+start=${1:-"start"}
+icon=fox.jpg
+SERVER=192.168.43.131:8000
+#-------------------------------------------------------------
+#Funtions-----------------------------------------------------
+function jumpto {
+	label=$1
+	cmd=$(sed -n "/$label:/{:a;n;p;ba};" $0 | grep -v ':$')
+	eval "$cmd"
+	exit
+}
+function register {
+	#Varibles----------------------------------------------------
+	REGMAIL=0
+	REGPASS=0
+	EMAILSTAT="Email - <span color='#00FF00'>OK</span>"
+	PASSSTAT="Password - <span color='#00FF00'>OK</span>"
+	PASSCSTAT="Confrim Password - <span color='#00FF00'>OK</span>"
+	NAMESTAT="Display Name - <span color='#00FF00'>OK</span>"
+	REGPASSC=0
+	REGNAME=0
+	ERR0=
+	ERR0E=
+	ERR1=
+	ERR2=
+	ERR3=
+	ERR1E=
+	ERR2E=
+	ERR3E=
+	#------------------------------------------------------------
+	#Email Check-------------------------------------------------
+	#Format Check----------------
+	EMAILGRAB=`echo $REGINFO | awk -F "|" '{print $1}'`
+	if ! [ -z "$EMAILGRAB" ]; then
+		EMAILLAG=`echo ${#EMAILGRAB}`
+		if [[ EMAILLAG -ge 5 ]]; then
+			EMAILCHECK=`case $EMAILGRAB in *@*) echo 1; esac`
+			if ! [[ EMAILCHECK -eq 1 ]]; then
+				ERR0="<span color='#FF0000'>"
+				ERR0E="</span>"
+				RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
+				EMAILSTAT="Email - <span color='#FF0000'>The Email given is not formated properly</span>"
+			else
+				REGMAIL=1
+			fi
+		else
+			ERR0="<span color='#FF0000'>"
+			ERR0E="</span>"
+			RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
+			EMAILSTAT="Email - <span color='#FF0000'>The Email given is less then five charictors long</span>"
+		fi
+	else
+		ERR0="<span color='#FF0000'>"
+		ERR0E="</span>"
+		EMAILSTAT="Email - <span color='#FF0000'>No Email was given</span>"
+	fi
+	#------------------------------------------------------------
+	#Password Check----------------------------------------------
+	PASSGRAB=`echo $REGINFO | awk -F "|" '{print $2}'`
+	if [ -n "$PASSGRAB" ]; then
+		PASSCHECK=`echo ${#PASSGRAB}`
+		if ! [[ PASSCHECK -ge 8 ]]; then
+			ERR1="<span color='#FF0000'>"
+			ERR1E="</span>"
+			PASSSTAT="Password - <span color='#FF0000'>The password given is less then eight charictors long</span>"
+		else
+			REGPASS=1
+		fi
+	else
+		ERR1="<span color='#FF0000'>"
+		ERR1E="</span>"
+		PASSSTAT="Password - <span color='#FF0000'>No password was given</span>"
+	fi
+	#------------------------------------------------------------------------------------------------Passwords NEED TO MATCH!!!!!!!!!!!!!
+	PASSCGRAB=`echo $REGINFO | awk -F "|" '{print $5}'`
+	if [ -n $PASSCGRAB ]; then
+		echo here
+		echo $PASSCGRAB
+		echo $PASSGRAB
+		if ! [[ PASSCGRAB -eq PASSGRAB ]]; then
+			ERR2="<span color='#FF0000'>"
+			ERR2E="</span>"
+			PASSCSTAT="Confrim Password - <span color='#FF0000'>Passwords do not match</span>"
+		else
+				REGCPASS=1
+		fi
+	else
+		ERR2="<span color='#FF0000'>"
+		ERR2E="</span>"
+		PASSCSTAT="Confrim Password - <span color='#FF0000'>No password was given</span>"
+	fi
+	#------------------------------------------------------------
+	#Username Check----------------------------------------------
+	NAMEGRAB=`echo $REGINFO | awk -F "|" '{print $3}'`
+	if [ -z "$NAMEGRAB" ]; then
+		ERR3="<span color='#FF0000'>"
+		ERR3E="</span>"
+		NAMESTAT="Display Name - <span color='#FF0000'>No Display Name was given</span>"
+	else
+		RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
+		REGNAME=1
+	fi
+	#API-------------------------------------------------------
+	#EMAIL-----------------------
+	if [[ REGMAIL -eq 1 ]]; then
+		RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
+		#Password--------------------
+		if [[ REGPASS -eq 1 ]]; then
+			RPASS=`echo $REGINFO | awk -F "|" '{print $2}'`
+			#Username--------------------
+			if [[ REGNAME -eq 1 ]]; then
+				RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
+				#Gender----------------------
+				RGEN=`echo $REGINFO | awk -F "|" '{print $6}'`
+				#----------------------------
+				#CALL------------------------
+				REGRUN=$(curl -s "http://$SERVER/api.php?register=$RMAIL&pass=$RPASS&displayname=$RNAME&gender=$RGEN&lang=en")
+				if [[ $REGRUN -eq 0 ]]; then
+					echo Show secsees message
+				fi
+				#----------------------------
+			fi
+			#----------------------------
+		fi
+		#----------------------------
+	fi
+	#----------------------------
+	yad --title="Notice!" \
+	--on-top \
+	--width="400" \
+	--center \
+	--window-icon="$icon" \
+	--text-align="center" \
+	--text="Some of the provided information was incorect." \
+	--list \
+	--no-headers \
+	--column="" \
+	--no-selection \
+	--buttons-layout="center" \
+	--button="OK":0 \
+	"$EMAILSTAT" "$PASSSTAT" "$PASSCSTAT" "$NAMESTAT" \
+	&
+	jumpto register
+	#----------------------------------
+}
+
+#-------------------------------------------------------------
+#Start Page---------------------------------------------------
+start:
+yad --title="FusionChat" \
+--width="512" \
+--height="256" \
+--center \
+--window-icon="$icon" \
+--text-align="center" \
+--text="FusionChat" \
+--buttons-layout="center" \
+--button="Login":2 \
+--button="New Account":3
+
+ANS1=$?
+
+if [[ ANS1 -eq 3 ]]; then
+	jumpto register
+fi
+if [[ ANS1 -eq 2 ]]; then
+	jumpto login
+fi
+if [[ ANS1 -eq 252 ]]; then
+	exit
+fi
+#-------------------------------------------------------------
+#Sign Up------------------------------------------------------
+register:
+REGINFO=$(
+	yad --title="FusionChat - Register" \
+	--width="128" \
+	--height="200" \
+	--center \
+	--window-icon="$icon" \
+	--form --text="Sign Up" --columns=2 \
+	--field="$ERR0 Email&#58; $ERR0E" \
+	--field="$ERR1 Password&#58; $ERR1E":H \
+	--field="$ERR3 Display Name&#58; $ERR3E" \
+	--field=" ":LBL \
+	--field="$ERR2 Confrim Password&#58; $ERR2E":H \
+	--field=" Gender&#58; ":CB \
+	--button="Back":4 \
+	--button="Register":0 \
+	"$RMAIL" "" "$RNAME" "" "" 'Hidden!Male!Female!Custom'
+)
+
+ANS2=$?
+if [[ ANS2 -eq 4 ]]; then
+	jumpto $start
+fi
+
+if [[ ANS2 -eq 0 ]]; then
+	register
+fi
+
+if [[ ANS2 -eq 252 ]]; then
+	exit
+fi
+#-------------------------------------------------------------
+#Login--------------------------------------------------------
+login:
+LOGINFO=$(
+	yad --title="FusionChat - Login" \
+	--width=128 \
+	--height=128 \
+	--center \
+	--window-icon="$icon" \
+	--form --text="Login" \
+	--field="Email:" \
+	--field="Password:":H \
+	--button="Back":4 \
+	--button="Login":0
+)
+
+ANS3=$?
+
+if [[ ANS3 -eq 4 ]]; then
+	jumpto $start
+fi
+if [[ ANS3 -eq 252 ]]; then
+	exit
+fi
+#-------------------------------------------------------------
