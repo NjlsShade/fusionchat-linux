@@ -8,7 +8,7 @@ WIDTH=1000
 HEIGHT=1000
 start=${1:-"start"}
 icon=fox.jpg
-SERVER=192.168.43.131:8000
+SERVER="http://192.168.43.131:8000"
 #-------------------------------------------------------------
 #Funtions-----------------------------------------------------
 function jumpto {
@@ -42,8 +42,8 @@ function register {
 	if ! [ -z "$EMAILGRAB" ]; then
 		EMAILLAG=`echo ${#EMAILGRAB}`
 		if [[ EMAILLAG -ge 5 ]]; then
-			EMAILCHECK=`case $EMAILGRAB in *@*) echo 1; esac`
-			if ! [[ EMAILCHECK -eq 1 ]]; then
+			EMAILCHECK=`case $EMAILGRAB in *?@*.?*) echo 1; esac`
+			if ! [ "$EMAILCHECK" = "1" ]; then
 				ERR0="<span color='#FF0000'>"
 				ERR0E="</span>"
 				RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
@@ -79,13 +79,12 @@ function register {
 		ERR1E="</span>"
 		PASSSTAT="Password - <span color='#FF0000'>No password was given</span>"
 	fi
-	#------------------------------------------------------------------------------------------------Passwords NEED TO MATCH!!!!!!!!!!!!!
 	PASSCGRAB=`echo $REGINFO | awk -F "|" '{print $5}'`
-	if [ -n $PASSCGRAB ]; then
+	if [ -n "$PASSCGRAB" ]; then
 		echo here
 		echo $PASSCGRAB
 		echo $PASSGRAB
-		if ! [[ PASSCGRAB -eq PASSGRAB ]]; then
+		if ! [ "$PASSCGRAB" = "$PASSGRAB" ]; then
 			ERR2="<span color='#FF0000'>"
 			ERR2E="</span>"
 			PASSCSTAT="Confrim Password - <span color='#FF0000'>Passwords do not match</span>"
@@ -110,38 +109,44 @@ function register {
 	fi
 	#API-------------------------------------------------------
 	#EMAIL-----------------------
-	if [[ REGMAIL -eq 1 ]]; then
+	if [ "$REGMAIL" = "1" ]; then
 		RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
 		#Password--------------------
-		if [[ REGPASS -eq 1 ]]; then
+		if [ "$REGPASS" = "1" ]; then
 			RPASS=`echo $REGINFO | awk -F "|" '{print $2}'`
-			#Username--------------------
-			if [[ REGNAME -eq 1 ]]; then
-				RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
-				#Gender----------------------
-				RGEN=`echo $REGINFO | awk -F "|" '{print $6}'`
-				#----------------------------
-				#CALL------------------------
-				REGRUN=$(curl -s --connect-timeout 8 "http://$SERVER/api.php?register=$RMAIL&pass=$RPASS&displayname=$RNAME&gender=$RGEN&lang=en")
-				if [ "$REGRUN" = "0" ]; then
-					echo good stuff
-				else
-					yad --title="Notice!" \
-					--on-top \
-					--width="256" \
-					--height="128" \
-					--center \
-					--window-icon="$icon" \
-					--fixed \
-					--text-align="center" \
-					--text="The Fusion server could not be reached." \
-					--buttons-layout="center" \
-					--button="OK":0 \
-					&
+			if [ "$REGCPASS" = "1" ]; then
+				#Username--------------------
+				if [ "$REGNAME" = "1" ]; then
+					RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
+					#Gender----------------------
+					RGEN=`echo $REGINFO | awk -F "|" '{print $6}'`
+					#----------------------------
+					#CALL------------------------
+					REGRUN=$(curl -s --connect-timeout 8 "$SERVER/api.php?register=$RMAIL&pass=$RPASS&displayname=$RNAME&gender=$RGEN&lang=en")
+					echo $REGRUN
+					if [ "$REGRUN" = "1" ]; then
+						echo good stuff
+						SESID=$(curl -s --connect-timeout 8 "$SERVER/api.php?login=$RMAIL&pass=$RPASS")
+						echo $SESID
+						echo `curl -s --connect-timeout 8 "$SERVER/api.php?logout=$SESID"`
+					else
+						yad --title="Notice!" \
+						--on-top \
+						--width="256" \
+						--height="128" \
+						--center \
+						--window-icon="$icon" \
+						--fixed \
+						--text-align="center" \
+						--text="The Fusion server could not be reached." \
+						--buttons-layout="center" \
+						--button="OK":0 \
+						&
+					fi
+					#----------------------------
 				fi
 				#----------------------------
 			fi
-			#----------------------------
 		fi
 		#----------------------------
 	fi
@@ -184,13 +189,13 @@ yad --title="FusionChat" \
 
 ANS1=$?
 
-if [[ ANS1 -eq 3 ]]; then
+if [ "$ANS1" = "3" ]; then
 	jumpto register
 fi
-if [[ ANS1 -eq 2 ]]; then
+if [ "$ANS1" = "2" ]; then
 	jumpto login
 fi
-if [[ ANS1 -eq 252 ]]; then
+if [ "$ANS1" = "252" ]; then
 	exit
 fi
 #-------------------------------------------------------------
@@ -216,15 +221,15 @@ REGINFO=$(
 )
 
 ANS2=$?
-if [[ ANS2 -eq 4 ]]; then
+if [ "$ANS2" = "4" ]; then
 	jumpto $start
 fi
 
-if [[ ANS2 -eq 0 ]]; then
+if [ "$ANS2" = "0" ]; then
 	register
 fi
 
-if [[ ANS2 -eq 252 ]]; then
+if [ "$ANS2" = "252" ]; then
 	exit
 fi
 #-------------------------------------------------------------
@@ -241,15 +246,19 @@ LOGINFO=$(
 	--field="Email:" \
 	--field="Password:":H \
 	--button="Back":4 \
-	--button="Login":0
+	--button="Login":0 \
+	"$LMAIL" "$LPASS"
 )
 
 ANS3=$?
 
-if [[ ANS3 -eq 4 ]]; then
+if [ "$ANS3" = "4" ]; then
 	jumpto $start
 fi
-if [[ ANS3 -eq 252 ]]; then
+if [ "$ANS3" = "252" ]; then
 	exit
 fi
+#-------------------------------------------------------------
+#Error Codes--------------------------------------------------
+
 #-------------------------------------------------------------
