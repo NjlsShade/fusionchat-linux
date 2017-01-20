@@ -122,9 +122,22 @@ function register {
 				RGEN=`echo $REGINFO | awk -F "|" '{print $6}'`
 				#----------------------------
 				#CALL------------------------
-				REGRUN=$(curl -s "http://$SERVER/api.php?register=$RMAIL&pass=$RPASS&displayname=$RNAME&gender=$RGEN&lang=en")
-				if [[ $REGRUN -eq 0 ]]; then
-					echo Show secsees message
+				REGRUN=$(curl -s --connect-timeout 8 "http://$SERVER/api.php?register=$RMAIL&pass=$RPASS&displayname=$RNAME&gender=$RGEN&lang=en")
+				if [ "$REGRUN" = "0" ]; then
+					echo good stuff
+				else
+					yad --title="Notice!" \
+					--on-top \
+					--width="256" \
+					--height="128" \
+					--center \
+					--window-icon="$icon" \
+					--fixed \
+					--text-align="center" \
+					--text="The Fusion server could not be reached." \
+					--buttons-layout="center" \
+					--button="OK":0 \
+					&
 				fi
 				#----------------------------
 			fi
@@ -136,8 +149,10 @@ function register {
 	yad --title="Notice!" \
 	--on-top \
 	--width="400" \
+	--height="164" \
 	--center \
 	--window-icon="$icon" \
+	--fixed \
 	--text-align="center" \
 	--text="Some of the provided information was incorect." \
 	--list \
@@ -160,6 +175,7 @@ yad --title="FusionChat" \
 --height="256" \
 --center \
 --window-icon="$icon" \
+--fixed \
 --text-align="center" \
 --text="FusionChat" \
 --buttons-layout="center" \
@@ -186,6 +202,7 @@ REGINFO=$(
 	--height="200" \
 	--center \
 	--window-icon="$icon" \
+	--fixed \
 	--form --text="Sign Up" --columns=2 \
 	--field="$ERR0 Email&#58; $ERR0E" \
 	--field="$ERR1 Password&#58; $ERR1E":H \
@@ -219,6 +236,7 @@ LOGINFO=$(
 	--height=128 \
 	--center \
 	--window-icon="$icon" \
+	--fixed \
 	--form --text="Login" \
 	--field="Email:" \
 	--field="Password:":H \
