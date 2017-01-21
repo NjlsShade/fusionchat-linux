@@ -35,6 +35,7 @@ function register {
 	ERR1E=
 	ERR2E=
 	ERR3E=
+	REGCPASS=
 	#------------------------------------------------------------
 	#Email Check-------------------------------------------------
 	#Format Check----------------
@@ -80,10 +81,8 @@ function register {
 		PASSSTAT="Password - <span color='#FF0000'>No password was given</span>"
 	fi
 	PASSCGRAB=`echo $REGINFO | awk -F "|" '{print $5}'`
+	PASSCCHECK=`echo ${#PASSCGRAB}`
 	if [ -n "$PASSCGRAB" ]; then
-		echo here
-		echo $PASSCGRAB
-		echo $PASSGRAB
 		if ! [ "$PASSCGRAB" = "$PASSGRAB" ]; then
 			ERR2="<span color='#FF0000'>"
 			ERR2E="</span>"
@@ -127,8 +126,7 @@ function register {
 					if [ "$REGRUN" = "1" ]; then
 						echo good stuff
 						SESID=$(curl -s --connect-timeout 8 "$SERVER/api.php?login=$RMAIL&pass=$RPASS")
-						echo $SESID
-						echo `curl -s --connect-timeout 8 "$SERVER/api.php?logout=$SESID"`
+						jumpto main
 					else
 						yad --title="Notice!" \
 						--on-top \
@@ -142,6 +140,7 @@ function register {
 						--buttons-layout="center" \
 						--button="OK":0 \
 						&
+						jumpto register
 					fi
 					#----------------------------
 				fi
@@ -258,6 +257,30 @@ fi
 if [ "$ANS3" = "252" ]; then
 	exit
 fi
+#Main---------------------------------------------------------
+main:
+MAININFO=$(
+	yad --title="FusionChat - Main" \
+	--width=128 \
+	--height=128 \
+	--center \
+	--window-icon="$icon" \
+	--fixed \
+	--text="YAY! You are in FusionChat!" \
+	--buttons-layout="center" \
+	--button="Logout":0 \
+)
+
+ANS4=$?
+
+if [ "$ANS4" = "0" ]; then
+	curl -s --connect-timeout 8 "$SERVER/api.php?logout=$SESID"
+	jumpto start
+fi
+if [ "$ANS4" = "252" ]; then
+	exit
+fi
+#-------------------------------------------------------------
 #-------------------------------------------------------------
 #Error Codes--------------------------------------------------
 
