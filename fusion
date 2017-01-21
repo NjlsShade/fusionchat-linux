@@ -1,4 +1,4 @@
-#FusionChat Linux v0.0.7
+#FusionChat Linux v0.0.8
 #By NjlsShade
 
 #Varibles-----------------------------------------------------
@@ -39,15 +39,14 @@ function register {
 	#------------------------------------------------------------
 	#Email Check-------------------------------------------------
 	#Format Check----------------
-	EMAILGRAB=`echo $REGINFO | awk -F "|" '{print $1}'`
-	if ! [ -z "$EMAILGRAB" ]; then
-		EMAILLAG=`echo ${#EMAILGRAB}`
+	RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
+	if ! [ -z "$RMAIL" ]; then
+		EMAILLAG=`echo ${#RMAIL}`
 		if [[ EMAILLAG -ge 5 ]]; then
-			EMAILCHECK=`case $EMAILGRAB in *?@*.?*) echo 1; esac`
+			EMAILCHECK=`case $RMAIL in *?@*.?*) echo 1; esac`
 			if ! [ "$EMAILCHECK" = "1" ]; then
 				ERR0="<span color='#FF0000'>"
 				ERR0E="</span>"
-				RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
 				EMAILSTAT="Email - <span color='#FF0000'>The Email given is not formated properly</span>"
 			else
 				REGMAIL=1
@@ -65,9 +64,9 @@ function register {
 	fi
 	#------------------------------------------------------------
 	#Password Check----------------------------------------------
-	PASSGRAB=`echo $REGINFO | awk -F "|" '{print $2}'`
-	if [ -n "$PASSGRAB" ]; then
-		PASSCHECK=`echo ${#PASSGRAB}`
+	RPASS=`echo $REGINFO | awk -F "|" '{print $2}'`
+	if [ -n "$RPASS" ]; then
+		PASSCHECK=`echo ${#RPASS}`
 		if ! [[ PASSCHECK -ge 8 ]]; then
 			ERR1="<span color='#FF0000'>"
 			ERR1E="</span>"
@@ -83,7 +82,7 @@ function register {
 	PASSCGRAB=`echo $REGINFO | awk -F "|" '{print $5}'`
 	PASSCCHECK=`echo ${#PASSCGRAB}`
 	if [ -n "$PASSCGRAB" ]; then
-		if ! [ "$PASSCGRAB" = "$PASSGRAB" ]; then
+		if ! [ "$PASSCGRAB" = "$RPASS" ]; then
 			ERR2="<span color='#FF0000'>"
 			ERR2E="</span>"
 			PASSCSTAT="Confrim Password - <span color='#FF0000'>Passwords do not match</span>"
@@ -97,35 +96,48 @@ function register {
 	fi
 	#------------------------------------------------------------
 	#Username Check----------------------------------------------
-	NAMEGRAB=`echo $REGINFO | awk -F "|" '{print $3}'`
-	if [ -z "$NAMEGRAB" ]; then
+	RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
+	if [ -z "$RNAME" ]; then
 		ERR3="<span color='#FF0000'>"
 		ERR3E="</span>"
 		NAMESTAT="Display Name - <span color='#FF0000'>No Display Name was given</span>"
 	else
-		RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
 		REGNAME=1
 	fi
+	#----------------------------------------------------------
+	#Gender Formate--------------------------------------------
+	RGEN=`echo $REGINFO | awk -F "|" '{print $6}'`
+	if [ "$RGEN" = "Custom" ]; then
+		RGEN=3
+	fi
+	if [ "$RGEN" = "Female" ]; then
+		RGEN=2
+	fi
+	if [ "$RGEN" = "Male" ]; then
+		RGEN=1
+	else
+		RGEN=0
+	fi
+	#----------------------------------------------------------
 	#API-------------------------------------------------------
 	#EMAIL-----------------------
 	if [ "$REGMAIL" = "1" ]; then
-		RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
 		#Password--------------------
 		if [ "$REGPASS" = "1" ]; then
-			RPASS=`echo $REGINFO | awk -F "|" '{print $2}'`
 			if [ "$REGCPASS" = "1" ]; then
 				#Username--------------------
 				if [ "$REGNAME" = "1" ]; then
-					RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
-					#Gender----------------------
-					RGEN=`echo $REGINFO | awk -F "|" '{print $6}'`
-					#----------------------------
 					#CALL------------------------
-					REGRUN=$(curl -s --connect-timeout 8 "$SERVER/api.php?register=$RMAIL&pass=$RPASS&displayname=$RNAME&gender=$RGEN&lang=en")
+					RMAILA=$(echo "$RMAIL" | sed 's/ /%20/g' | sed 's/[]!@#[$%^&*()-]/\\&/g')
+					RPASSA=$(echo "$RPASS" | sed 's/ /%20/g' | sed 's/[]!@#[$%^&*()-]/\\&/g')
+					RNAMEA=$(echo "$RNAME" | sed 's/ /%20/g' | sed 's/[]!@#[$%^&*()-]/\\&/g')
+					REGENCODE="$SERVER/api.php?register=$RMAILA&pass=$RPASSA&displayname=$RNAMEA&gender=$RGEN&lang=en"
+					REGRUN=$(curl -s --connect-timeout 8 "$REGENCODE")
 					echo $REGRUN
+					echo "$REGENCODE"
 					if [ "$REGRUN" = "1" ]; then
 						echo good stuff
-						SESID=$(curl -s --connect-timeout 8 "$SERVER/api.php?login=$RMAIL&pass=$RPASS")
+						SESID=$(curl -s --connect-timeout 8 "$SERVER/api.php?login=$RMAILA&pass=$RPASSA")
 						jumpto main
 					else
 						yad --title="Notice!" \

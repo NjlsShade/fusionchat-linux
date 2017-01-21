@@ -1,4 +1,4 @@
 Do not log program shell session;
 Finish auto login after register;
 Make confirm password detect if it's less then eight characters;
-No spaces in passwords;
+Need to get special character escaping fixed;
