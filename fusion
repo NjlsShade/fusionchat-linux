@@ -128,16 +128,17 @@ function register {
 				#Username--------------------
 				if [ "$REGNAME" = "1" ]; then
 					#CALL------------------------
-					RMAILA=$(echo "$RMAIL" | sed 's/ /%20/g' | sed 's/[]!@#[$%^&*()-]/\\&/g')
-					RPASSA=$(echo "$RPASS" | sed 's/ /%20/g' | sed 's/[]!@#[$%^&*()-]/\\&/g')
-					RNAMEA=$(echo "$RNAME" | sed 's/ /%20/g' | sed 's/[]!@#[$%^&*()-]/\\&/g')
+					RMAILA=$(echo "$RMAIL" | sed 's/[]!@#[$%^&*()-]/\\&/g' | sed 's/ /%20/g')
+					RPASSA=$(echo "$RPASS" | sed 's/[]!@#[$%^&*()-]/\\&/g' | sed 's/ /%20/g')
+					RNAMEA=$(echo "$RNAME" | sed 's/[]!@#[$%^&*()-]/\\&/g' | sed 's/ /%20/g')
 					REGENCODE="$SERVER/api.php?register=$RMAILA&pass=$RPASSA&displayname=$RNAMEA&gender=$RGEN&lang=en"
 					REGRUN=$(curl -s --connect-timeout 8 "$REGENCODE")
 					echo $REGRUN
 					echo "$REGENCODE"
 					if [ "$REGRUN" = "1" ]; then
 						echo good stuff
-						SESID=$(curl -s --connect-timeout 8 "$SERVER/api.php?login=$RMAILA&pass=$RPASSA")
+						SESID=$(curl -s --connect-timeout 8 $SERVER/api.php?login=$RMAILA&pass=$RPASSA)
+						echo $SESID
 						jumpto main
 					else
 						yad --title="Notice!" \
@@ -193,7 +194,7 @@ yad --title="FusionChat" \
 --window-icon="$icon" \
 --fixed \
 --text-align="center" \
---text="FusionChat" \
+--text="<span font='32'>FusionChat</span>" \
 --buttons-layout="center" \
 --button="Login":2 \
 --button="New Account":3
