@@ -1,5 +1,4 @@
 Do not log program shell session;
 Finish auto login after register;
 Make confirm password detect if it's less then eight characters;
-Check if special character escaping is fixed;
 Retain gender selection when getting a register error;
