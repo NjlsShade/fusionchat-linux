@@ -1,15 +1,13 @@
-#FusionChat Linux v0.0.8
+#FusionChat Linux v0.0.9
 #By NjlsShade
 
 #Varibles-----------------------------------------------------
-LOGIN=0
-REG=0
 WIDTH=1000
 HEIGHT=1000
 start=${1:-"start"}
 icon=fox.jpg
 SERVER="http://192.168.43.131:8000"
-DEBUGSERVER="localhost:8888"
+DEBUGSERVER=0
 #-------------------------------------------------------------
 #Varible aplications------------------------------------------
 if ! [ $DEBUGSERVER = 0 ]; then
@@ -31,7 +29,6 @@ function register {
 	PASSSTAT="Password - <span color='#00FF00'>OK</span>"
 	PASSCSTAT="Confrim Password - <span color='#00FF00'>OK</span>"
 	NAMESTAT="Display Name - <span color='#00FF00'>OK</span>"
-	REGPASSC=0
 	REGNAME=0
 	ERR0=
 	ERR0E=
@@ -44,7 +41,6 @@ function register {
 	REGCPASS=
 	#------------------------------------------------------------
 	#Email Check-------------------------------------------------
-	#Format Check----------------
 	RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
 	if ! [ -z "$RMAIL" ]; then
 		EMAILLAG=`echo ${#RMAIL}`
@@ -134,9 +130,22 @@ function register {
 				#Username--------------------
 				if [ "$REGNAME" = "1" ]; then
 					#CALL------------------------
-					REGRUN=$(curl -G -s --max-time 8 $DEBUG --data-urlencode "register=$RMAIL" --data-urlencode "pass=$RPASS" --data-urlencode "displayname=$RNAME" --data-urlencode "gender=$RGEN" --data-urlencode "lang=en" "$SERVER/api.php")
+					REGRUN=$(
+						curl -G -s --max-time 8 $DEBUG \
+						--data-urlencode "register=$RMAIL" \
+						--data-urlencode "pass=$RPASS" \
+						--data-urlencode "displayname=$RNAME" \
+						--data-urlencode "gender=$RGEN" \
+						--data-urlencode "lang=en" \
+						"$SERVER/api.php"
+					)
 					if [ "$REGRUN" = "1" ]; then
-						SESID=$(curl -s --connect-timeout 8 $SERVER/api.php?login=$RMAILA&pass=$RPASSA)
+						SESID=$(
+							curl -G -s --max-time 8 \
+							--data-urlencode login=$RMAIL \
+							--data-urlencode pass=$RPASS \
+							$SERVER/api.php
+						)
 						jumpto main
 					else
 						yad --title="Notice!" \
