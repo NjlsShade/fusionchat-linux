@@ -9,6 +9,12 @@ HEIGHT=1000
 start=${1:-"start"}
 icon=fox.jpg
 SERVER="http://192.168.43.131:8000"
+DEBUGSERVER="localhost:8888"
+#-------------------------------------------------------------
+#Varible aplications------------------------------------------
+if ! [ $DEBUGSERVER = 0 ]; then
+	DEBUG="--proxy $DEBUGSERVER"
+fi
 #-------------------------------------------------------------
 #Funtions-----------------------------------------------------
 function jumpto {
@@ -128,7 +134,7 @@ function register {
 				#Username--------------------
 				if [ "$REGNAME" = "1" ]; then
 					#CALL------------------------
-					REGRUN=$(curl -G -s --connect-timeout 8 --data-urlencode "register=$RMAIL" --data-urlencode "pass=$RPASS" --data-urlencode "displayname=$RNAME" --data-urlencode "gender=$RGEN" "lang=en" "$SERVER/api.php")
+					REGRUN=$(curl -G -s --max-time 8 $DEBUG --data-urlencode "register=$RMAIL" --data-urlencode "pass=$RPASS" --data-urlencode "displayname=$RNAME" --data-urlencode "gender=$RGEN" --data-urlencode "lang=en" "$SERVER/api.php")
 					if [ "$REGRUN" = "1" ]; then
 						SESID=$(curl -s --connect-timeout 8 $SERVER/api.php?login=$RMAILA&pass=$RPASSA)
 						jumpto main
