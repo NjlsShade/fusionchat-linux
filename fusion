@@ -1,159 +1,165 @@
 #FusionChat Linux v0.0.9
 #By NjlsShade
 
-#Varibles-----------------------------------------------------
+#Static Varibles-----------------------------------------------------
 WIDTH=1000
 HEIGHT=1000
-start=${1:-"start"}
-icon=fox.jpg
+START=${1:-"start"}
+ICON=fox.jpg
 SERVER="http://192.168.43.131:8000"
 DEBUGSERVER=0
 #-------------------------------------------------------------
-#Varible aplications------------------------------------------
+#Static Varible aplication------------------------------------------
 if ! [ $DEBUGSERVER = 0 ]; then
-	DEBUG="--proxy $DEBUGSERVER"
+	_debug="--proxy $DEBUGSERVER"
 fi
 #-------------------------------------------------------------
 #Funtions-----------------------------------------------------
 function jumpto {
-	label=$1
-	cmd=$(sed -n "/$label:/{:a;n;p;ba};" $0 | grep -v ':$')
-	eval "$cmd"
+	__label=$1
+	__cmd=$(sed -n "/$__label:/{:a;n;p;ba};" $0 | grep -v ':$')
+	eval "$__cmd"
 	exit
 }
 function register {
-	#Varibles----------------------------------------------------
-	REGMAIL=0
-	REGPASS=0
-	EMAILSTAT="Email - <span color='#00FF00'>OK</span>"
-	PASSSTAT="Password - <span color='#00FF00'>OK</span>"
-	PASSCSTAT="Confrim Password - <span color='#00FF00'>OK</span>"
-	NAMESTAT="Display Name - <span color='#00FF00'>OK</span>"
-	REGNAME=0
-	ERR0=
-	ERR0E=
-	ERR1=
-	ERR2=
-	ERR3=
-	ERR1E=
-	ERR2E=
-	ERR3E=
-	REGCPASS=
+	#Register Varibles----------------------------------------------------
+	__regmail=0
+	__regpass=0
+	__emailstat="Email - <span color='#00FF00'>OK</span>"
+	__passstat="Password - <span color='#00FF00'>OK</span>"
+	__pass2stat="Confrim Password - <span color='#00FF00'>OK</span>"
+	__namestat="Display Name - <span color='#00FF00'>OK</span>"
+	__regname=0
+	__regcpass=
+	#Rebase error fields---------
+	__err0=
+	__err1=
+	__err2=
+	__err3=
+	__err0e=
+	__err1e=
+	__err2e=
+	__err3e=
+	#----------------------------
+	__rmail=
+	__rpass=
+	__rname=
+	__rgen=
+
+	__emaillag=
+	__emailcheck=
+	__passcheck=
+	__pass2grab=
+	__pass2check=
 	#------------------------------------------------------------
 	#Email Check-------------------------------------------------
-	RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
-	if ! [ -z "$RMAIL" ]; then
-		EMAILLAG=`echo ${#RMAIL}`
-		if [[ EMAILLAG -ge 5 ]]; then
-			EMAILCHECK=`case $RMAIL in *?@*.?*) echo 1; esac`
-			if ! [ "$EMAILCHECK" = "1" ]; then
-				ERR0="<span color='#FF0000'>"
-				ERR0E="</span>"
-				EMAILSTAT="Email - <span color='#FF0000'>The Email given is not formated properly</span>"
+	__rmail=`echo $_reginfo | awk -F "|" '{print $1}'`
+	if ! [ -z "$__rmail" ]; then
+		__emaillag=`echo ${#__rmail}`
+		if [[ __emaillag -ge 5 ]]; then
+			__emailcheck=`case $__rmail in *?@*.?*) echo 1; esac`
+			if ! [ "$__emailcheck" = "1" ]; then
+				__err0="<span color='#FF0000'>"
+				__err0e="</span>"
+				__emailstat="Email - <span color='#FF0000'>The Email given is not formated properly</span>"
 			else
-				REGMAIL=1
+				__regmail=1
 			fi
 		else
-			ERR0="<span color='#FF0000'>"
-			ERR0E="</span>"
-			RMAIL=`echo $REGINFO | awk -F "|" '{print $1}'`
-			EMAILSTAT="Email - <span color='#FF0000'>The Email given is less then five charictors long</span>"
+			__err0="<span color='#FF0000'>"
+			__err0e="</span>"
+			__rmail=`echo $_reginfo | awk -F "|" '{print $1}'`
+			__emailstat="Email - <span color='#FF0000'>The Email given is less then five charictors long</span>"
 		fi
 	else
-		ERR0="<span color='#FF0000'>"
-		ERR0E="</span>"
-		EMAILSTAT="Email - <span color='#FF0000'>No Email was given</span>"
+		__err0="<span color='#FF0000'>"
+		__err0e="</span>"
+		__emailstat="Email - <span color='#FF0000'>No Email was given</span>"
 	fi
 	#------------------------------------------------------------
 	#Password Check----------------------------------------------
-	RPASS=`echo $REGINFO | awk -F "|" '{print $2}'`
-	if [ -n "$RPASS" ]; then
-		PASSCHECK=`echo ${#RPASS}`
-		if ! [[ PASSCHECK -ge 8 ]]; then
-			ERR1="<span color='#FF0000'>"
-			ERR1E="</span>"
-			PASSSTAT="Password - <span color='#FF0000'>The password given is less then eight charictors long</span>"
+	__rpass=`echo $_reginfo | awk -F "|" '{print $2}'`
+	if [ -n "$__rpass" ]; then
+		__passcheck=`echo ${#__rpass}`
+		if ! [[ __passcheck -ge 8 ]]; then
+			__err1="<span color='#FF0000'>"
+			__err1e="</span>"
+			__passstat="Password - <span color='#FF0000'>The password given is less then eight charictors long</span>"
 		else
-			REGPASS=1
+			__regpass=1
 		fi
 	else
-		ERR1="<span color='#FF0000'>"
-		ERR1E="</span>"
-		PASSSTAT="Password - <span color='#FF0000'>No password was given</span>"
+		__err1="<span color='#FF0000'>"
+		__err1e="</span>"
+		__passstat="Password - <span color='#FF0000'>No password was given</span>"
 	fi
-	PASSCGRAB=`echo $REGINFO | awk -F "|" '{print $5}'`
-	PASSCCHECK=`echo ${#PASSCGRAB}`
-	if [ -n "$PASSCGRAB" ]; then
-		if ! [ "$PASSCGRAB" = "$RPASS" ]; then
-			ERR2="<span color='#FF0000'>"
-			ERR2E="</span>"
-			PASSCSTAT="Confrim Password - <span color='#FF0000'>Passwords do not match</span>"
+	__pass2grab=`echo $_reginfo | awk -F "|" '{print $5}'`
+	__pass2check=`echo ${#__pass2grab}`
+	if [ -n "$__pass2grab" ]; then
+		if ! [ "$__pass2grab" = "$__rpass" ]; then
+			__err2="<span color='#FF0000'>"
+			__err2e="</span>"
+			__pass2stat="Confrim Password - <span color='#FF0000'>Passwords do not match</span>"
 		else
-				REGCPASS=1
+				__regcpass=1
 		fi
 	else
-		ERR2="<span color='#FF0000'>"
-		ERR2E="</span>"
-		PASSCSTAT="Confrim Password - <span color='#FF0000'>No password was given</span>"
+		__err2="<span color='#FF0000'>"
+		__err2e="</span>"
+		__pass2stat="Confrim Password - <span color='#FF0000'>No password was given</span>"
 	fi
 	#------------------------------------------------------------
 	#Username Check----------------------------------------------
-	RNAME=`echo $REGINFO | awk -F "|" '{print $3}'`
-	if [ -z "$RNAME" ]; then
-		ERR3="<span color='#FF0000'>"
-		ERR3E="</span>"
-		NAMESTAT="Display Name - <span color='#FF0000'>No Display Name was given</span>"
+	__rname=`echo $_reginfo | awk -F "|" '{print $3}'`
+	if [ -z "$__rname" ]; then
+		__err3="<span color='#FF0000'>"
+		__err3e="</span>"
+		__namestat="Display Name - <span color='#FF0000'>No Display Name was given</span>"
 	else
-		REGNAME=1
+		__regname=1
 	fi
 	#----------------------------------------------------------
 	#Gender Formate--------------------------------------------
-	RGEN=`echo $REGINFO | awk -F "|" '{print $6}'`
-	if [ "$RGEN" = "Custom" ]; then
-		RGEN=3
+	__rgen=`echo $_reginfo | awk -F "|" '{print $6}'`
+	if [ "$__rgen" = "Custom" ]; then
+		__rgen=3
 	fi
-	if [ "$RGEN" = "Female" ]; then
-		RGEN=2
+	if [ "$__rgen" = "Female" ]; then
+		__rgen=2
 	fi
-	if [ "$RGEN" = "Male" ]; then
-		RGEN=1
+	if [ "$__rgen" = "Male" ]; then
+		__rgen=1
 	else
-		RGEN=0
+		__rgen=0
 	fi
 	#----------------------------------------------------------
 	#API-------------------------------------------------------
 	#EMAIL-----------------------
-	if [ "$REGMAIL" = "1" ]; then
+	if [ "$__regmail" = "1" ]; then
 		#Password--------------------
-		if [ "$REGPASS" = "1" ]; then
-			if [ "$REGCPASS" = "1" ]; then
+		if [ "$__regpass" = "1" ]; then
+			if [ "$__regcpass" = "1" ]; then
 				#Username--------------------
-				if [ "$REGNAME" = "1" ]; then
+				if [ "$__regname" = "1" ]; then
 					#CALL------------------------
-					REGRUN=$(
-						curl -G -s --max-time 8 $DEBUG \
-						--data-urlencode "register=$RMAIL" \
-						--data-urlencode "pass=$RPASS" \
-						--data-urlencode "displayname=$RNAME" \
-						--data-urlencode "gender=$RGEN" \
+					__regrun=$(
+						curl -G -s --max-time 8 $_debug \
+						--data-urlencode "register=$__rmail" \
+						--data-urlencode "pass=$__rpass" \
+						--data-urlencode "displayname=$__rname" \
+						--data-urlencode "gender=$__rgen" \
 						--data-urlencode "lang=en" \
 						"$SERVER/api.php"
 					)
-					if [ "$REGRUN" = "1" ]; then
-						SESID=$(
-							curl -G -s --max-time 8 \
-							--data-urlencode login=$RMAIL \
-							--data-urlencode pass=$RPASS \
-							$SERVER/api.php
-						)
-						jumpto main
+					if [ "$__regrun" = "1" ]; then
+						echo temp
 					else
 						yad --title="Notice!" \
 						--on-top \
 						--width="256" \
 						--height="128" \
 						--center \
-						--window-icon="$icon" \
+						--window-icon="$ICON" \
 						--fixed \
 						--text-align="center" \
 						--text="The Fusion server could not be reached." \
@@ -175,7 +181,7 @@ function register {
 	--width="400" \
 	--height="164" \
 	--center \
-	--window-icon="$icon" \
+	--window-icon="$ICON" \
 	--fixed \
 	--text-align="center" \
 	--text="Some of the provided information was incorect." \
@@ -185,12 +191,22 @@ function register {
 	--no-selection \
 	--buttons-layout="center" \
 	--button="OK":0 \
-	"$EMAILSTAT" "$PASSSTAT" "$PASSCSTAT" "$NAMESTAT" \
+	"$__emailstat" "$__passstat" "$__pass2stat" "$__namestat" \
 	&
 	jumpto register
 	#----------------------------------
 }
+function login {
 
+	__sesid=$(
+		curl -G -s --max-time 8 \
+		--data-urlencode login=$__lmail \
+		--data-urlencode pass=$__lpass \
+		$SERVER/api.php
+	)
+	jumpto main
+
+}
 #-------------------------------------------------------------
 #Start Page---------------------------------------------------
 start:
@@ -198,106 +214,112 @@ yad --title="FusionChat" \
 --width="512" \
 --height="256" \
 --center \
---window-icon="$icon" \
+--window-icon="$ICON" \
 --fixed \
 --text-align="center" \
---text="<span font='32'>FusionChat</span>" \
+--text="<span color='#0000FF' size='32000'>FusionChat</span>" \
 --buttons-layout="center" \
 --button="Login":2 \
 --button="New Account":3
 
-ANS1=$?
+_ans1=$?
 
-if [ "$ANS1" = "3" ]; then
+if [ "$_ans1" = "3" ]; then
 	jumpto register
 fi
-if [ "$ANS1" = "2" ]; then
+if [ "$_ans1" = "2" ]; then
 	jumpto login
 fi
-if [ "$ANS1" = "252" ]; then
+if [ "$_ans1" = "252" ]; then
 	exit
 fi
 #-------------------------------------------------------------
 #Sign Up------------------------------------------------------
+#Varibles---------------------
+_reginfo=
+#-----------------------------
 register:
-REGINFO=$(
+_reginfo=$(
 	yad --title="FusionChat - Register" \
 	--width="128" \
 	--height="200" \
 	--center \
-	--window-icon="$icon" \
+	--window-icon="$ICON" \
 	--fixed \
 	--form --text="Sign Up" --columns=2 \
-	--field="$ERR0 Email&#58; $ERR0E" \
-	--field="$ERR1 Password&#58; $ERR1E":H \
-	--field="$ERR3 Display Name&#58; $ERR3E" \
+	--field="$__err0 Email&#58; $__err0e" \
+	--field="$__err1 Password&#58; $__err1e":H \
+	--field="$__err3 Display Name&#58; $__err3e" \
 	--field=" ":LBL \
-	--field="$ERR2 Confrim Password&#58; $ERR2E":H \
+	--field="$__err2 Confrim Password&#58; $__err2e":H \
 	--field=" Gender&#58; ":CB \
 	--button="Back":4 \
 	--button="Register":0 \
-	"$RMAIL" "" "$RNAME" "" "" 'Hidden!Male!Female!Custom'
+	"$__rmail" "" "$__rname" "" "" 'Hidden!Male!Female!Custom'
 )
 
-ANS2=$?
-if [ "$ANS2" = "4" ]; then
-	jumpto $start
+_ans2=$?
+if [ "$_ans2" = "4" ]; then
+	jumpto $START
 fi
 
-if [ "$ANS2" = "0" ]; then
+if [ "$_ans2" = "0" ]; then
 	register
 fi
 
-if [ "$ANS2" = "252" ]; then
+if [ "$_ans2" = "252" ]; then
 	exit
 fi
 #-------------------------------------------------------------
 #Login--------------------------------------------------------
 login:
-LOGINFO=$(
+_loginfo=$(
 	yad --title="FusionChat - Login" \
 	--width=128 \
 	--height=128 \
 	--center \
-	--window-icon="$icon" \
+	--window-icon="$ICON" \
 	--fixed \
 	--form --text="Login" \
 	--field="Email:" \
 	--field="Password:":H \
 	--button="Back":4 \
 	--button="Login":0 \
-	"$LMAIL" "$LPASS"
+	"$__lmail" ""
 )
 
-ANS3=$?
+_ans3=$?
 
-if [ "$ANS3" = "4" ]; then
-	jumpto $start
+if [ "$_ans3" = "0" ]; then
+	echo temp
 fi
-if [ "$ANS3" = "252" ]; then
+if [ "$_ans3" = "4" ]; then
+	jumpto $START
+fi
+if [ "$_ans3" = "252" ]; then
 	exit
 fi
 #Main---------------------------------------------------------
 main:
-MAININFO=$(
+_maininfo=$(
 	yad --title="FusionChat - Main" \
 	--width=128 \
 	--height=128 \
 	--center \
-	--window-icon="$icon" \
+	--window-icon="$ICON" \
 	--fixed \
 	--text="YAY! You are in FusionChat!" \
 	--buttons-layout="center" \
 	--button="Logout":0 \
 )
 
-ANS4=$?
+_ans4=$?
 
-if [ "$ANS4" = "0" ]; then
-	curl -s --connect-timeout 8 "$SERVER/api.php?logout=$SESID"
+if [ "$_ans4" = "0" ]; then
+	curl -s --connect-timeout 8 "$SERVER/api.php?logout=$__sesid"
 	jumpto start
 fi
-if [ "$ANS4" = "252" ]; then
+if [ "$_ans4" = "252" ]; then
 	exit
 fi
 #-------------------------------------------------------------
