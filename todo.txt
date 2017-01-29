@@ -1,2 +1,5 @@
 Make confirm password detect if it's less then eight characters;
 Retain gender selection when getting a register error;
+Can yad fields have character size and type limitations?;
+max-time not working;
+Add progress bar to login;

@@ -142,32 +142,45 @@ function register {
 				#Username--------------------
 				if [ "$__regname" = "1" ]; then
 					#CALL------------------------
-					__regrun=$(
-						curl -G -s --max-time 8 $_debug \
-						--data-urlencode "register=$__rmail" \
-						--data-urlencode "pass=$__rpass" \
-						--data-urlencode "displayname=$__rname" \
-						--data-urlencode "gender=$__rgen" \
-						--data-urlencode "lang=en" \
-						"$SERVER/api.php"
-					)
-					if [ "$__regrun" = "1" ]; then
-						echo temp
-					else
-						yad --title="Notice!" \
-						--on-top \
-						--width="256" \
-						--height="128" \
-						--center \
-						--window-icon="$ICON" \
-						--fixed \
-						--text-align="center" \
-						--text="The Fusion server could not be reached." \
-						--buttons-layout="center" \
-						--button="OK":0 \
-						&
-						jumpto register
-					fi
+					( echo 50
+						__regrun=$(
+							curl -G -s -m 1 $_debug \
+							--data-urlencode "register=$__rmail" \
+							--data-urlencode "pass=$__rpass" \
+							--data-urlencode "displayname=$__rname" \
+							--data-urlencode "gender=$__rgen" \
+							--data-urlencode "lang=en" \
+							"$SERVER/api.php"
+						)
+						echo 90
+
+						if [ "$__regrun" = "1" ]; then
+							echo temp
+						else
+							yad --title="Notice!" \
+							--on-top \
+							--width="256" \
+							--height="128" \
+							--center \
+							--window-icon="$ICON" \
+							--fixed \
+							--text-align="center" \
+							--text="The Fusion server could not be reached." \
+							--buttons-layout="center" \
+							--button="OK":0 \
+							&
+							echo 100
+						fi
+					) | yad --title="Registering..." \
+					--width=150 \
+					--center \
+					--window-icon="$ICON" \
+					--progress \
+					--auto-close \
+					--text="Registering..." \
+					--undecorated \
+					--no-buttons
+					jumpto register
 					#----------------------------
 				fi
 				#----------------------------
@@ -275,14 +288,14 @@ fi
 login:
 _loginfo=$(
 	yad --title="FusionChat - Login" \
-	--width=128 \
+	--width=360 \
 	--height=128 \
 	--center \
 	--window-icon="$ICON" \
 	--fixed \
 	--form --text="Login" \
-	--field="Email:" \
-	--field="Password:":H \
+	--field=" Email&#58; " \
+	--field=" Password&#58; ":H \
 	--button="Back":4 \
 	--button="Login":0 \
 	"$__lmail" ""
