@@ -242,6 +242,10 @@ function login {
 #Call Base Varibles---------------------------------------------
 rebase
 #---------------------------------------------------------------
+if [[ "$1" = "cmd" ]]; then
+	_shell=1
+	jumpto shell
+fi
 #Start Page-----------------------------------------------------
 start:
 yad --title="FusionChat" \
@@ -368,4 +372,28 @@ esac
 #---------------------------------------------------------------
 #Error Codes----------------------------------------------------
 
+#---------------------------------------------------------------
+#FusionShell----------------------------------------------------
+shell:
+if [ "$_shell" = "1" ]; then
+	clear
+	echo -e $GREENB"Fusion Shell v0.0.1"$ENDCOLOR
+	echo -e $RED"The Fusion Shell allows you to manuly invoke commands and set configureations"$ENDCOLOR
+	echo
+	prompt:
+	echo -e -n $BLUEB"$USER@Fusion >> "$ENDCOLOR
+	read ANS
+	case $ANS in
+		exit)
+			exit
+		;;
+		echo*)
+			echo "$ANS" | cut -d' ' -f2-
+			jumpto prompt
+		;;
+		*)
+			echo "Invalid!"
+			jumpto prompt
+	esac
+fi
 #---------------------------------------------------------------
