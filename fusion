@@ -8,6 +8,18 @@ START=${1:-"start"}
 ICON=fox.jpg
 SERVER="http://192.168.43.131:8000"
 DEBUGSERVER=0
+VERSION=0.0.10
+#Colors-----------------------
+WHITE="\033[1m"
+LIGHTRED="\033[1;31m"
+RED="\033[31m"
+YELLOW="\033[1;33m"
+BLUE="\033[34m"
+BLUEB="\033[1;34m"
+GREEN="\033[32m"
+GREENB="\033[1;32m"
+ENDCOLOR="\033[0m"
+#-----------------------------
 #---------------------------------------------------------------
 #Static Varible aplication--------------------------------------
 if ! [ $DEBUGSERVER = 0 ]; then
@@ -242,7 +254,7 @@ function login {
 #Call Base Varibles---------------------------------------------
 rebase
 #---------------------------------------------------------------
-if [[ "$1" = "cmd" ]]; then
+if [[ "$1" = "--cmd" ]] || [[ "$1" = "-c" ]]; then
 	_shell=1
 	jumpto shell
 fi
@@ -377,23 +389,37 @@ esac
 shell:
 if [ "$_shell" = "1" ]; then
 	clear
-	echo -e $GREENB"Fusion Shell v0.0.1"$ENDCOLOR
-	echo -e $RED"The Fusion Shell allows you to manuly invoke commands and set configureations"$ENDCOLOR
+	echo -e "Fusion Shell v0.0.1"
+	echo -e "The Fusion Shell allows you to manuly invoke commands and set configureations"
 	echo
 	prompt:
 	echo -e -n $BLUEB"$USER@Fusion >> "$ENDCOLOR
 	read ANS
 	case $ANS in
-		exit)
-			exit
-		;;
 		echo*)
 			echo "$ANS" | cut -d' ' -f2-
 			jumpto prompt
 		;;
-		*)
-			echo "Invalid!"
+		version)
+			echo -e "FusionChat ---------->$BLUE v$VERSION$ENDCOLOR"
+			echo -e "Fusion Shell -------->$BLUE v0.0.1$ENDCOLOR"
 			jumpto prompt
+		;;
+		launch)
+			clear
+			jumpto start
+		;;
+		exit)
+			clear
+			exit
+		;;
+		*?*)
+			echo "$ANS: is not a valid command"
+			jumpto prompt
+		;;
+		*)
+			jumpto prompt
+		;;
 	esac
 fi
 #---------------------------------------------------------------
