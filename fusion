@@ -9,6 +9,7 @@ ICON=fox.jpg
 SERVER="http://192.168.43.131:8000"
 DEBUGSERVER=0
 VERSION=0.0.10
+HISTFILE=bash_history
 #Colors-----------------------
 WHITE="\033[1m"
 LIGHTRED="\033[1;31m"
@@ -34,6 +35,9 @@ function rebase {
 	d4=Custom
 }
 function jumpto {
+	if [ -e exit ]; then
+		cd ..
+	fi
 	__label=$1
 	__cmd=$(sed -n "/$__label:/{:a;n;p;ba};" $0 | grep -v ':$')
 	eval "$__cmd"
@@ -250,6 +254,12 @@ function login {
 	jumpto main
 
 }
+function hiscall {
+	echo "$ANS" >> bash_history
+	history -a
+	history -c
+	history -r
+}
 #---------------------------------------------------------------
 #Call Base Varibles---------------------------------------------
 rebase
@@ -388,32 +398,56 @@ esac
 #FusionShell----------------------------------------------------
 shell:
 if [ "$_shell" = "1" ]; then
+	echo "" > shell/bash_history
+	history -c
+	history -r
 	clear
-	echo -e "Fusion Shell v0.0.1"
+	echo -e $BLUE"Fusion Shell v0.0.1"$ENDCOLOR
 	echo -e "The Fusion Shell allows you to manuly invoke commands and set configureations"
 	echo
+	echo
+	echo -e "Type$GREENB help$ENDCOLOR for a list of possible commands"
+	echo
+	echo -e "Type$GREENB exit$ENDCOLOR to leave Fusion Shell"
+	echo
 	prompt:
-	echo -e -n $BLUEB"$USER@Fusion >> "$ENDCOLOR
-	read ANS
+	cd shell
+	read -e -r -p $'\033[1;34m>>\033[0m ' ANS
 	case $ANS in
 		echo*)
+			hiscall
 			echo "$ANS" | cut -d' ' -f2-
 			jumpto prompt
 		;;
-		version)
-			echo -e "FusionChat ---------->$BLUE v$VERSION$ENDCOLOR"
-			echo -e "Fusion Shell -------->$BLUE v0.0.1$ENDCOLOR"
+		version-chat)
+			hiscall
+			echo -e "FusionChat ------------>$BLUE v$VERSION$ENDCOLOR"
+			jumpto prompt
+		;;
+		version-shell)
+			hiscall
+			echo -e "Fusion Shell ---------->$BLUE v0.0.1$ENDCOLOR"
+			jumpto prompt
+		;;
+		version-api)
+			echo -e "FusionChat API -------->$BLUE v1.0$ENDCOLOR"
 			jumpto prompt
 		;;
 		launch)
 			clear
 			jumpto start
 		;;
+		help)
+			hiscall
+			echo -e "Good Stuff"
+			jumpto prompt
+		;;
 		exit)
 			clear
 			exit
 		;;
 		*?*)
+			hiscall
 			echo "$ANS: is not a valid command"
 			jumpto prompt
 		;;
