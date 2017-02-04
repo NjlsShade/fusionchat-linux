@@ -2,3 +2,5 @@ Make confirm password detect if it's less then eight characters;
 Can yad fields have character size and type limitations?;
 max-time not working (Windows only);
 Add progress bar to login;
+Better tab completion;
+Don't log multiple of the same command to history if preformed after each other;

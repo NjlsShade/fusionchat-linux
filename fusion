@@ -4,12 +4,12 @@
 #Static Varibles------------------------------------------------
 WIDTH=1000
 HEIGHT=1000
-START=${1:-"start"}
+#START=${1:-"start"}
 ICON=fox.jpg
 SERVER="http://192.168.43.131:8000"
 DEBUGSERVER=0
 VERSION=0.0.10
-HISTFILE=bash_history
+HISTFILE=shell/fuse_history
 #Colors-----------------------
 WHITE="\033[1m"
 LIGHTRED="\033[1;31m"
@@ -255,14 +255,23 @@ function login {
 
 }
 function hiscall {
-	echo "$ANS" >> bash_history
+	cd ../../
+	echo "$ANS" | awk '{print $1}' >> shell/fuse_history
 	history -a
 	history -c
 	history -r
 }
+function config {
+	ICON=$(cat config/var.ns)
+}
 #---------------------------------------------------------------
-#Call Base Varibles---------------------------------------------
+#PRE Fusion-----------------------------------------------------
+#Call Base Varibles------------
 rebase
+#------------------------------
+#Call config-------------------
+config
+#------------------------------
 #---------------------------------------------------------------
 if [[ "$1" = "--cmd" ]] || [[ "$1" = "-c" ]]; then
 	_shell=1
@@ -323,7 +332,8 @@ _reginfo=$(
 _ans2=$?
 case $_ans2 in
 	4)
-		jumpto $START
+		echo yeah
+		jumpto start
 	;;
 	0)
 		register
@@ -357,7 +367,7 @@ case $_ans3 in
 		echo temp
 	;;
 	4)
-		jumpto $START
+		jumpto start
 	;;
 	252)
 		exit
@@ -398,7 +408,7 @@ esac
 #FusionShell----------------------------------------------------
 shell:
 if [ "$_shell" = "1" ]; then
-	echo "" > shell/bash_history
+	echo "" > shell/fuse_history
 	history -c
 	history -r
 	clear
@@ -411,7 +421,7 @@ if [ "$_shell" = "1" ]; then
 	echo -e "Type$GREENB exit$ENDCOLOR to leave Fusion Shell"
 	echo
 	prompt:
-	cd shell
+	cd shell/bin
 	read -e -r -p $'\033[1;34m>>\033[0m ' ANS
 	case $ANS in
 		echo*)
@@ -430,12 +440,34 @@ if [ "$_shell" = "1" ]; then
 			jumpto prompt
 		;;
 		version-api)
+			hiscall
+			echo -e "FusionChat API -------->$BLUE v1.0$ENDCOLOR"
+			jumpto prompt
+		;;
+		version)
+			hiscall
+			echo -e "FusionChat ------------>$BLUE v$VERSION$ENDCOLOR"
+			echo -e "Fusion Shell ---------->$BLUE v0.0.1$ENDCOLOR"
 			echo -e "FusionChat API -------->$BLUE v1.0$ENDCOLOR"
 			jumpto prompt
 		;;
 		launch)
+			cd ../../
 			clear
 			jumpto start
+		;;
+		set-icon*)
+			hiscall
+			if [[ "$ANS" = set-icon\ ?* ]];then
+				_con=$(echo "$ANS" | cut -d' ' -f2-)
+			else
+				echo not yet woof!
+				jumpto prompt
+			fi
+			echo "$_con" > config/var.ns
+			ICON=$_con
+			echo Changed the icon to $_con
+			jumpto prompt
 		;;
 		help)
 			hiscall
@@ -452,6 +484,7 @@ if [ "$_shell" = "1" ]; then
 			jumpto prompt
 		;;
 		*)
+			cd ../../
 			jumpto prompt
 		;;
 	esac
