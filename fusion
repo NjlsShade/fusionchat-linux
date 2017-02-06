@@ -178,7 +178,7 @@ function register {
 					#CALL---------------------------
 					( echo 50
 						__regrun=$(
-							curl -G -s -m 4 $_debug -X POST \
+							curl -s -m 4 $_debug -X POST \
 							--data-urlencode "register=$__rmail" \
 							--data-urlencode "pass=$__rpass" \
 							--data-urlencode "displayname=$__rname" \
@@ -246,7 +246,7 @@ function register {
 function login {
 
 	__sesid=$(
-		curl -G -s -m 4 -X $_debug POST \
+		curl -s -m 4 -X $_debug POST \
 		--data-urlencode login=$__lmail \
 		--data-urlencode pass=$__lpass \
 		$SERVER/api.php
@@ -286,7 +286,7 @@ yad --title="FusionChat" \
 --window-icon="$ICON" \
 --fixed \
 --text-align="center" \
---text="<span color='#0000FF' size='32000'>FusionChat</span>" \
+--text="<span color='#000000' size='32000'>FusionChat</span>" \
 --buttons-layout="center" \
 --button="Login":2 \
 --button="New Account":3
@@ -474,7 +474,7 @@ if [ "$_shell" = "1" ]; then
 			echo -e "Good Stuff"
 			jumpto prompt
 		;;
-		exit)
+		exit | quit | q)
 			clear
 			exit
 		;;

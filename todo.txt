@@ -4,3 +4,4 @@ max-time not working (Windows only);
 Add progress bar to login;
 Better tab completion;
 Don't log multiple of the same command to history if preformed after each other;
+Add debug mode;
