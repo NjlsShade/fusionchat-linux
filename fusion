@@ -1,14 +1,14 @@
-#FusionChat Linux v0.0.10
+#FusionChat Linux v0.0.11
 #By NjlsShade
 
-#Static Varibles------------------------------------------------
+#Static Variables------------------------------------------------
 WIDTH=1000
 HEIGHT=1000
 #START=${1:-"start"}
 ICON=fox.jpg
 SERVER="http://192.168.43.131:8000"
 DEBUGSERVER=0
-VERSION=0.0.10
+VERSION=0.0.11
 HISTFILE=shell/fuse_history
 #Colors-----------------------
 WHITE="\033[1m"
@@ -22,12 +22,12 @@ GREENB="\033[1;32m"
 ENDCOLOR="\033[0m"
 #-----------------------------
 #---------------------------------------------------------------
-#Static Varible aplication--------------------------------------
+#Static Variable application--------------------------------------
 if ! [ $DEBUGSERVER = 0 ]; then
 	_debug="--proxy $DEBUGSERVER"
 fi
 #---------------------------------------------------------------
-#Funtions-------------------------------------------------------
+#Functions-------------------------------------------------------
 function rebase {
 	d1=Hidden
 	d2=Male
@@ -44,12 +44,12 @@ function jumpto {
 	exit
 }
 function register {
-	#Register Varibles----------------------------------------------
+	#Register Variables----------------------------------------------
 	__regmail=0
 	__regpass=0
 	__emailstat="Email - <span color='#00FF00'>OK</span>"
 	__passstat="Password - <span color='#00FF00'>OK</span>"
-	__pass2stat="Confrim Password - <span color='#00FF00'>OK</span>"
+	__pass2stat="Confirm Password - <span color='#00FF00'>OK</span>"
 	__namestat="Display Name - <span color='#00FF00'>OK</span>"
 	__regname=0
 	__regcpass=
@@ -83,7 +83,7 @@ function register {
 			if ! [ "$__emailcheck" = "1" ]; then
 				__err0="<span color='#FF0000'>"
 				__err0e="</span>"
-				__emailstat="Email - <span color='#FF0000'>The Email given is not formated properly</span>"
+				__emailstat="Email - <span color='#FF0000'>The Email given is not formatted properly</span>"
 			else
 				__regmail=1
 			fi
@@ -91,7 +91,7 @@ function register {
 			__err0="<span color='#FF0000'>"
 			__err0e="</span>"
 			__rmail=`echo $_reginfo | awk -F "|" '{print $1}'`
-			__emailstat="Email - <span color='#FF0000'>The Email given is less then five charictors long</span>"
+			__emailstat="Email - <span color='#FF0000'>The Email given is less then five characters long</span>"
 		fi
 	else
 		__err0="<span color='#FF0000'>"
@@ -106,7 +106,7 @@ function register {
 		if ! [[ __passcheck -ge 8 ]]; then
 			__err1="<span color='#FF0000'>"
 			__err1e="</span>"
-			__passstat="Password - <span color='#FF0000'>The password given is less then eight charictors long</span>"
+			__passstat="Password - <span color='#FF0000'>The password given is less then eight characters long</span>"
 		else
 			__regpass=1
 		fi
@@ -178,7 +178,7 @@ function register {
 					#CALL---------------------------
 					( echo 50
 						__regrun=$(
-							curl -s -m 4 $_debug -X POST \
+							curl -s -m 4 $_debug \
 							--data-urlencode "register=$__rmail" \
 							--data-urlencode "pass=$__rpass" \
 							--data-urlencode "displayname=$__rname" \
@@ -231,7 +231,7 @@ function register {
 	--window-icon="$ICON" \
 	--fixed \
 	--text-align="center" \
-	--text="Some of the provided information was incorect." \
+	--text="Some of the provided information was incorrect." \
 	--list \
 	--no-headers \
 	--column="" \
@@ -244,14 +244,81 @@ function register {
 	#-------------------------------
 }
 function login {
+	#Variables-------------------------------------------------------
+	__lmail=
+	__lpass=
+	__sesid=
+	__sesidnum=
+	#---------------------------------------------------------------
+	#Login Grab-----------------------------------------------------
+	__lmail=`echo $_loginfo | awk -F "|" '{print $1}'`
+	__lpass=`echo $_loginfo | awk -F "|" '{print $2}'`
+	#---------------------------------------------------------------
+	#Email Check----------------------------------------------------
+	if ! [ -z "$__lmail" ]; then
+		__emaillag=`echo ${#__rmail}`
+		if [[ __emaillag -ge 5 ]]; then
+			__emailcheck=`case $__lmail in *?@*.?*) echo 1; esac`
+			if ! [ "$__emailcheck" = "1" ]; then
+				__logerr0="<span color='#FF0000'>"
+				__logerr0e="</span>"
+				__logemailstat="Email - <span color='#FF0000'>The Email given is not formatted properly</span>"
+			else
+				__logmail=1
+			fi
+		else
+			__logerr0="<span color='#FF0000'>"
+			__logerr0e="</span>"
+			__lmail=`echo $_loginfo | awk -F "|" '{print $1}'`
+			__logemailstat="Email - <span color='#FF0000'>The Email given is less then five characters long</span>"
+		fi
+	else
+		__logerr0="<span color='#FF0000'>"
+		__logerr0e="</span>"
+		__logemailstat="Email - <span color='#FF0000'>No Email was given</span>"
+	fi
+	#---------------------------------------------------------------
+	#Password Check-------------------------------------------------
 
-	__sesid=$(
-		curl -s -m 4 -X $_debug POST \
-		--data-urlencode login=$__lmail \
-		--data-urlencode pass=$__lpass \
-		$SERVER/api.php
-	)
-	jumpto main
+	#---------------------------------------------------------------
+	( echo 50
+		__sesid=$(
+			curl -s -m 4 $_debug \
+			--data-urlencode login=$__lmail \
+			--data-urlencode pass=$__lpass \
+			$SERVER/api.php
+		)
+		echo 90
+
+		__sesidnum=`echo ${#__sesid}`
+		echo $__sesidnum
+		if [ "$__sesidnum" = "128" ]; then
+			jumpto main
+		else
+			yad --title="Notice!" \
+			--on-top \
+			--width="256" \
+			--height="128" \
+			--center \
+			--window-icon="$ICON" \
+			--fixed \
+			--text-align="center" \
+			--text="The Fusion server could not be reached." \
+			--buttons-layout="center" \
+			--button="OK":0 \
+			&
+			echo 100
+		fi
+	) | yad --title="Registering..." \
+	--width=150 \
+	--center \
+	--window-icon="$ICON" \
+	--progress \
+	--auto-close \
+	--text="Registering..." \
+	--undecorated \
+	--no-buttons
+	jumpto login
 
 }
 function hiscall {
@@ -322,7 +389,7 @@ _reginfo=$(
 	--field="$__err1 Password&#58; $__err1e":H \
 	--field="$__err3 Display Name&#58; $__err3e" \
 	--field=" ":LBL \
-	--field="$__err2 Confrim Password&#58; $__err2e":H \
+	--field="$__err2 Confirm Password&#58; $__err2e":H \
 	--field=" Gender&#58; ":CB \
 	--button="Back":4 \
 	--button="Register":0 \
@@ -364,7 +431,7 @@ _ans3=$?
 
 case $_ans3 in
 	0)
-		echo temp
+		login
 	;;
 	4)
 		jumpto start
@@ -377,11 +444,15 @@ esac
 main:
 _maininfo=$(
 	yad --title="FusionChat - Main" \
-	--width=128 \
-	--height=128 \
+	--width=512 \
+	--height=256 \
 	--center \
 	--window-icon="$ICON" \
 	--fixed \
+	--notebook \
+	--tab=Notes \
+	--tab-pos=top \
+	--tab-borders=5 \
 	--text="YAY! You are in FusionChat!" \
 	--buttons-layout="center" \
 	--button="Logout":0 \
@@ -391,7 +462,7 @@ _ans4=$?
 
 case $_ans4 in
 	0)
-		curl -s -m 4 -X POST \
+		curl -s -m 4 \
 		--data-urlencode logout=$__sesid \
 		"$SERVER/api.php"
 		jumpto start
@@ -413,7 +484,7 @@ if [ "$_shell" = "1" ]; then
 	history -r
 	clear
 	echo -e $BLUE"Fusion Shell v0.0.1"$ENDCOLOR
-	echo -e "The Fusion Shell allows you to manuly invoke commands and set configureations"
+	echo -e "The Fusion Shell allows you to manually invoke commands and set configurations"
 	echo
 	echo
 	echo -e "Type$GREENB help$ENDCOLOR for a list of possible commands"
