@@ -444,18 +444,15 @@ esac
 main:
 _maininfo=$(
 	yad --title="FusionChat - Main" \
+	--window-icon="$ICON" \
 	--width=512 \
 	--height=256 \
 	--center \
-	--window-icon="$ICON" \
 	--fixed \
-	--notebook \
-	--tab=Notes \
-	--tab-pos=top \
-	--tab-borders=5 \
 	--text="YAY! You are in FusionChat!" \
-	--buttons-layout="center" \
+	--buttons-layout="spread" \
 	--button="Logout":0 \
+	--button="Logout2":0
 )
 
 _ans4=$?
