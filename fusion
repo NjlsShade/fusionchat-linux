@@ -1,7 +1,9 @@
 #FusionChat Linux v0.0.11
 #By NjlsShade
+PATH=./:./binary/bin
+export DISPLAY=:0.0
 
-#Static Variables------------------------------------------------
+#Static Variables-----------------------------------------------
 WIDTH=1000
 HEIGHT=1000
 #START=${1:-"start"}
@@ -10,7 +12,7 @@ SERVER="http://192.168.43.131:8000"
 DEBUGSERVER=0
 VERSION=0.0.11
 HISTFILE=shell/fuse_history
-#Colors-----------------------
+#Colors-------------------------
 WHITE="\033[1m"
 LIGHTRED="\033[1;31m"
 RED="\033[31m"
@@ -20,14 +22,14 @@ BLUEB="\033[1;34m"
 GREEN="\033[32m"
 GREENB="\033[1;32m"
 ENDCOLOR="\033[0m"
-#-----------------------------
+#-------------------------------
 #---------------------------------------------------------------
-#Static Variable application--------------------------------------
+#Static Variable application------------------------------------
 if ! [ $DEBUGSERVER = 0 ]; then
 	_debug="--proxy $DEBUGSERVER"
 fi
 #---------------------------------------------------------------
-#Functions-------------------------------------------------------
+#Functions------------------------------------------------------
 function rebase {
 	d1=Hidden
 	d2=Male
